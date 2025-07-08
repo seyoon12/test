@@ -23,7 +23,7 @@ helm repo update
 helm search repo rancher-stable
 helm install rancher rancher-stable/rancher \
   --namespace cattle-system \
-  --set hostname=rancher.test.com \
+  --set hostname=rancher.sa.com \
   --set bootstrapPassword=admin \
   --set ingress.tls.source=letsEncrypt \
   --set letsEncrypt.email=wntpqhd1326@gmail.com \
