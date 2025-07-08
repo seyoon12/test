@@ -48,7 +48,10 @@ systemctl daemon-reexec
 systemctl daemon-reload
 
 
-systemctl show -p TasksMax -.slice system.slice rke2-server
+systemctl show -p TasksMax -- -.slice
+systemctl show -p TasksMax system.slice
+systemctl show -p TasksMax rke2-server
+sudo EDITOR=vim systemctl edit rke2-server
 sudo systemctl edit rke2-server
 [Service]
 TasksMax=infinity
