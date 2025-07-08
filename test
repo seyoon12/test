@@ -1,0 +1,70 @@
+swapoff -a
+curl -sfL https://get.rke2.io | INSTALL_RKE2_TYPE="server" sh -
+systemctl enable rke2-server
+systemctl restart rke2-server
+systemctl status rke2-server
+mkdir ~/.kube/
+cp /etc/rancher/rke2/rke2.yaml ~/.kube/config
+export PATH=$PATH:/var/lib/rancher/rke2/bin/
+echo 'export PATH=/usr/local/bin:/var/lib/rancher/rke2/bin:$PATH' >> ~/.bashrc
+echo 'alias k="kubectl"' >> ~/.bashrc
+echo 'alias kns="kubectl config set-context --current --namespace"' >> ~/.bashrc
+source ~/.bashrc
+kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v1.5.4/cert-manager.yaml
+kubectl -n cert-manager rollout status deploy/cert-manager
+kubectl get pods --namespace cert-manager
+kubectl -n cert-manager rollout status deploy/cert-manager-webhook
+curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3
+chmod 700 get_helm.sh
+./get_helm.sh
+kubectl create namespace cattle-system
+helm repo add rancher-stable https://releases.rancher.com/server-charts/stable
+helm repo update
+helm search repo rancher-stable
+helm install rancher rancher-stable/rancher \
+  --namespace cattle-system \
+  --set hostname=rancher.test.com \
+  --set bootstrapPassword=admin \
+  --set ingress.tls.source=letsEncrypt \
+  --set letsEncrypt.email=wntpqhd1326@gmail.com \
+  --set letsEncrypt.ingress.class=nginx
+
+
+
+systemctl stop rke2-server
+/usr/bin/rke2-uninstall.sh
+rm -rf /etc/rancher/rke2
+rm -rf /var/lib/rancher/rke2
+rm -rf /var/lib/kubelet
+rm -rf /etc/rancher/k3s
+rm -rf /etc/systemd/system/rke2-*
+rm -rf /run/flannel
+rm -rf /var/lib/cni/
+rm -rf /opt/cni/
+rm -rf /etc/cni/
+rm -f /usr/local/bin/kubectl
+rm -f /usr/local/bin/crictl
+systemctl daemon-reexec
+systemctl daemon-reload
+
+
+systemctl show -p TasksMax -- -.slice
+systemctl show -p TasksMax system.slice
+systemctl show -p TasksMax rke2-server
+sudo EDITOR=vim systemctl edit rke2-server
+sudo systemctl edit rke2-server
+[Service]
+TasksMax=infinity
+LimitNPROC=infinity
+
+sudo systemctl set-property system.slice TasksMax=infinity
+sudo systemctl daemon-reload
+sudo systemctl restart rke2-server
+
+
+
+
+
+
+
+
